@@ -53,6 +53,13 @@ const a = [1, 2, 3];
 a = 4;
 ```
 
+The ```late``` keyword can be used to lazily initialize a variable. Example:
+
+```
+late String temperature = readThermometer();
+```
+Maybe the function ```readThermometer()``` is very expensive, i.e. takes a long time to execute. If the variable temperature is never used it is never initialized and therefore the function is never called.
+
 ## Built-in types
 
 There are two different types of numeric types: ```int``` and ```double```. Also, a variable can be declared to be of type ```num```. In this case, it can hold both ```double``` and ```int``` values:
