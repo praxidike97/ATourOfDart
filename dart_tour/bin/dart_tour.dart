@@ -10,6 +10,7 @@ String name03 = 'Bob';
 
 
 void main() {
-   var number = 42;
-   printInteger(number);
+  var a = 12;
+  a = "Test";
+  print(a);
 }
