@@ -1,5 +1,7 @@
 # Readme
 
+A walkthrough of https://dart.dev/guides/language/language-tour
+
 ## Important concepts
 
 - Everything is an object, even numbers and functions
@@ -133,7 +135,7 @@ bool isNoble(atomicNumber) {
 }
 ```
 
-If a function consists just of a single expression it can be shortened:
+If a function consists just of a single expression it can be shortened (also called **arrow notation**):
 
 ```
 bool isNoble(int atomicNumber) => _nobleGases[atomicNumber] != null;
@@ -152,4 +154,249 @@ This function than can be called like this:
 enableFLags(bold: true, hidden: false);
 ```
 
-Similarly, optional positional parameters can be passed by wapping them in ```[]```. 
+Similarly, optional positional parameters can be passed by wapping them in ```[]```.
+
+Optional parameters can be given default values. For example the function from above would look like this:
+
+```
+void enableFlags({bool bold = false, bool hidden = false}) {...}
+```
+
+Every Dart program must have a ```main()``` function as an entry point. It can not return anything. Additionally, it can (but does not have to!) take a list of Strings (could be arguments for example if started as a CLI program).
+
+As stated above, functions can be assigned to variables:
+
+```
+var loudify = (msg) => '${msg.toUpperCase()}';
+```
+
+Note, that here an anonymous function (also called lambda function) is used.
+Another example of a lambda function:
+
+```
+const list = ['apples', 'bananas', 'oranges'];
+list.forEach((item) {
+  print('${list.indexOf(item)}: $item')
+});
+```
+
+If the anonymous function consists of just a single function the arrow notation can also be used here:
+
+```
+list.forEach((item) => print('${list.indexOf(item)}: $item'))
+```
+
+All functions have a return value! If not otherwise specified they return null.
+
+## Operators
+
+In Dart, variables can be incremented with either ```++var``` or ```var++```. The important difference here is that ```var++``` returns ```var``` whereas ```++var``` returns ```var + 1```.
+The same holds for ```var--``` and ```--var```.
+
+The operator ```as``` is used for typecasting (and library import, just like Python does), ```is``` is used to test if an object is of the specified type. On the contrary, ```is!``` tests if the object is **not** of the specified type (in Python this would be ```is not```).
+
+The operator ```??=``` only assigns a value to the variable if it is ```null```, otherwise the variable remains unchanged.
+
+Important: ```&``` and ```|``` are bit-wise operators, whereas ```&&``` and ```||``` are logical operators.
+
+There is also the ternary operator that many other languages have:
+
+```
+condition ? expre01 : expre02
+```
+
+There is also another operator, defined as
+
+```
+expr01 ?? expre02
+```
+
+If expr01 is non-null its value is returned, otherwise expr02 is returned. One example for this is
+
+```
+String playerName(String? name) => name ?? 'Guest';
+```
+
+Another useful opeator is for the cascade notation: ```..``` and ```?..```. It allows to perform multiple actions on the same object. So, instead of writing
+
+```
+var paint = Paint();
+paint.color = Colors.black;
+paint.strokeCap = strokeCap.round;
+paint.strokeWidth = 5.0;
+```
+
+this operator makes it possible to write
+
+```
+var paint = Paint()
+  ..color = Colors.black
+  ..strokeCap = StrokeCap.round
+  ..strokeWidth = 5.0
+```
+
+Possibly, the object the cascade is performed on can be ```null```. To ensure that the cascade does not completely fail, the ```?..``` can be used. Important: this operator has just to be used for the **first** operator! Example:
+
+```
+querySelector('#confirm')
+  ?..text = 'Confirm'
+  ..classes.add('important')
+  ..onClick.listen((e) => window.alert('Confirmed!'))
+  ..scrollIntoView();
+```
+
+this code is equivalent to
+
+```
+var button = querySelector('#confirm');
+button?.text = 'Confirm';
+button?.classes.add('important');
+button?.onClick.listen((e) => window.alert('Confirmed!'));
+button?.scrollIntoView();
+```
+
+Note: cascades can also be nested!
+
+Just two more operators:
+
+ The first one is ```?[]```. Just like ```[]``` but the leftmost operator can be ```null```. Example: ```fooList?[1]```. This evaluates to ```null```
+
+ Second, ```!``` can be used to force a typecast into a non-nullable type. Dangerous: if the type-cast fails a runtime exception is called.
+
+
+## Control flow statements
+
+If and else:
+```
+if (...) {
+
+}else if (){
+
+}else{
+
+}
+```
+
+For loops:
+```
+for (var i = 0; i < 5; i++){
+  ...
+}
+```
+
+Not required, but very interesting example from the Dart tour:
+
+```
+var callbacks = [];
+for (var i = 0; i < 2; i++) {
+  // Very interesting construct: anonymous functions are
+  // added to the callbacks list. The bracket () is empty
+  // which means that the anonymous function does not take
+  // any arguments. It consists of just a single line, that // is why the arow notation us used. After this for loop
+  // the callbacks lists consists of print() functions
+  // with a certain value i
+  callbacks.add(() => print(i))
+}
+
+// Iterate through all of the elements in the callback list
+// and again apply anonymous functions to each element.
+// Every c is a print function, so c() is just a call of
+// the print function with its i value.
+callbacks.forEach((c) => c());
+```
+
+Convenience function: if the iteration is over an Iterable (such as List, Set, etc.) a for-each iteration (similar to Java) is possible:
+
+```
+for (final candidate in candidates) {
+  candidate.interview();
+}
+```
+
+Another very elegant solution from the Dart tour:
+
+Instead of
+
+```
+for (int i = 0; i < candidates.length; i++) {
+  var candidate = candidates[i];
+  if (candidate.yearsExperience < 5) {
+    continue;
+  }
+  candidate.interview();
+}
+```
+
+(better) write
+
+```
+candidates
+  .where((c) => c.yearsExperience >= 5)
+  .forEach((c) => c.interview());
+```
+
+Switch and case works nearly exactly to the one in Java. Example:
+
+```
+var command = 'OPEN';
+switch (command) {
+  case 'CLOSED':
+    executeClosed();
+    break;
+  case 'PENDING':
+    executePending();
+    break;
+  default:
+    executeUnknown();
+}
+```
+
+Dart also supports fall-through:
+
+```
+var command = 'CLOSED';
+switch (command) {
+  case 'CLOSED':
+  case 'NOW_CLOSED':
+    executeNowClosed();
+    break;
+}
+```
+
+## Exception handling
+
+An error can be easily thrown using the ```throw``` keyword, for example:
+
+```
+throw FormatException('Expected at least 1 section!')
+```
+
+Something kind of special (don't know if possible in other programming languages?) is that not only Exceptions can be thrown but basically any object, e.g.
+
+```
+throw 'Out of llamas!';
+```
+
+or even
+
+```
+throw 12;
+```
+
+Example for a (typically?) try-catch structure:
+
+```
+try {
+  ...
+} on OutOfLlamasException {
+  ...
+} on LlamaTooCuteException catch (e) {
+  ...
+} on Exception catch (e, s) {
+  ...
+} catch (e)
+  ...
+}
+```
+
+Note that a caught exception can have two parameters: ```e``` is the Exception itself whereas ```s``` is the stacktrace of the exception. 
