@@ -399,4 +399,227 @@ try {
 }
 ```
 
-Note that a caught exception can have two parameters: ```e``` is the Exception itself whereas ```s``` is the stacktrace of the exception. 
+Note that a caught exception can have two parameters: ```e``` is the Exception itself whereas ```s``` is the stacktrace of the exception.
+
+Another very interesting (and unique?) property of Dart is the ```rethrow``` keyword. This allows to propagate an exception to a higher level.
+
+## Classes
+
+In Dart, all classes except ```null``` descend from ```Object```. Furthermore, it has **mixin-based inheritance**. This means, that every class has exactly one superclass. It can implement extension methods to extend its functionality.
+
+Very important: to create a new Object the ```new``` keyword is **purely optional**. This means that
+
+```
+var p1 = Point(2, 2);
+```
+
+has **exactly the same effect** as
+
+```
+var p2 = new Point(2, 2);
+```
+
+Some classes only have a **constant constructor**. They are created using the ```const``` keyword, for example:
+
+```
+var p = const ImmutablePoint(2, 2);
+```
+
+To get an object's type just use the ```Object``` property ```runtimeType```.
+
+Example of declaring instance variables:
+
+```
+class Point {
+  double? x;
+  double? y;
+  double z = 0;
+}
+```
+
+All uninitialized instance variables have the value ```null```. Important: something like this
+
+```
+class Point {
+  double x;
+}
+```
+
+is **not** possible as the variable x has no value now. This snippet would throw an error during compilation. To fix this, either write
+
+```
+class Point {
+  double? x;
+}
+```
+
+or
+
+```
+class Point {
+  late double x;
+}
+```
+
+Non-final instance variables automatically have getter and setter methods.
+
+The constructor of a class basically works exactly as in Java (lol). Example:
+
+```
+class Point {
+  double x = 0;
+  double y = 0;
+
+  Point(double x, double y) {
+    this.x = x;
+    this.y = y;
+  }
+}
+```
+
+as everyone knows, this is a very common operation, that is why Dart has a shortcut for this. The above code can be rewritten as
+
+```
+class Point {
+  double x = 0.0;
+  double y = 0.0;
+
+  Point(this.x, this.y);
+}
+```
+
+**Constructors aren't inherited!**
+
+Named constructors can be used to implement multiple constructors for a class. Extending the example from above:
+
+```
+class Point {
+  double x = 0.0;
+  double y = 0.0;
+
+  Point(this.x, this.y);
+
+  Point.funny(){
+    this.x = -1.0;
+    this.y = -1.0;
+  }
+}
+```
+
+To create an object with a named constructor call
+
+```
+var p = Point.funny();
+```
+
+Important: if the superclass doesn't have an unnamed, no-argument constructor, then you must manually call one of the constructors in the superclass. The superclass constructor must be defined after a colon before the constructor body. Example:
+
+```
+class Employee extends Person {
+  Employee() : super.fromJson(fetchDefaultData());
+}
+```
+
+Another important note: Arguments to the superclass constructor do not have access to ```this```. Instead, use the keyword ```super```. Example:
+
+```
+class Vector2d {
+  final double x;
+  final double y;
+
+  Vector2d(this.x, this.y);
+}
+
+class Vector3d extends Vector2d {
+  final double z;
+
+  Vector3d(super.x, super.y, this.z);
+}
+```
+
+There are also **redirecting constructors**. This is used if a constructor calls another constructor. Example:
+
+```
+class Point {
+  double x, y;
+
+  Point(this.x, this.y);
+
+  Point.alongXAxis(double x) : this(x, 0);
+}
+```
+
+It is also possible to define constant constructors. To do so, a const constructor has to be defined and all variables have to be made ```final```. Example:
+
+```
+class ImmutablePoint {
+  final double x, y;
+
+  const ImmutablePoint(this.x, this.y);
+}
+```
+
+Finally, the ```factory``` keyword can be used when a constructor does not necessarily need to create a new instance every time but can for example retrieve one from a cache.
+
+There are a lot of different kinds of methods.
+
+Instance methods are methods that can access instance variables and the keyword ```this```. Example:
+
+```
+import 'dart:math'
+
+class Point {
+  final double x;
+  final double y;
+
+  Point(this.x, this.y);
+
+  double distanceTo(Point other) {
+    var dx = x - other.x;
+    var dy = y - other.y;
+    return sqrt(dx*dx + dy*dy);
+  }
+
+}
+```
+
+It is also possible to overload existing operators, like the ```+``` and ```-``` operator. Example:
+
+```
+class Vector {
+  final int x,y;
+
+  Vector(this.x, this.y);
+
+  Vector operator +(Vector v) => Vector(x + v.x, y + v.y);
+  Vector operator -(Vector v) => Vector(x - v.x, y - v.y);
+
+}
+```
+
+This makes it now very easy to add and subtract vectors.
+
+As already known, each instance variable has implicit getters and setters. It is possible to define new properties solely through getters and setters:
+
+```
+class Rectangle {
+  double left, top, width, height;
+
+  Recangle(this.left, this.top, this.width, this.height);
+
+  // Define a new property 'right' through this getter
+  double get right => left + width;
+
+  set right(double value) => left = value - width;
+}
+```
+
+ALso, ```abstract``` classes and methods can be defined, leaving the concrete implementation to the classes that extend this one. Example:
+
+```
+abstract class Doer {
+
+  // Abstract method (no special keyword!)
+  void doSomething();
+}
+```
